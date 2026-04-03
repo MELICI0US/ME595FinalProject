@@ -82,7 +82,7 @@ if __name__ == '__main__':
     print("RUNNING SIMULATION...")
     start_time = time.time()
 
-    for i in tqdm(range(10)):
+    for i in tqdm(range(100)):
         # print("RUNNING GAME ", i)
         run_game()
     
