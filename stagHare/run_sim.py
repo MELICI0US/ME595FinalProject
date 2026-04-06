@@ -3,6 +3,7 @@ from tqdm import tqdm
 from offlineSimStuff.runningTools.runnerHelper import create_jhg_sim, create_total_order, create_jhg_engine
 from stagHare.agents.cabAgentThing import CabAgent
 from stagHare.agents.fetcherBot import FetcherBot
+from stagHare.agents.rl_agent.q_table_abstracted_manager import QTableAbstractedManager
 from stagHare.agents.rl_agent.q_table_manager import QTableManager
 from stagHare.environment.world import StagHare
 from stagHare.environment.allocationTranslator import allocation_to_movement, movement_to_allocation
@@ -82,7 +83,7 @@ def run_game(q_table_manager):
 if __name__ == '__main__':
     print("RUNNING SIMULATION...")
     start_time = time.time()
-    q_tabel_manager = QTableManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_stag_only.txt')
+    q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted.txt')
 
     for i in tqdm(range(100000)):
         # print("RUNNING GAME ", i)
@@ -91,7 +92,7 @@ if __name__ == '__main__':
         except Exception as e:
             print(f"Error in game {i}: {e}")
 
-        if (i+1) % 100 == 0: # save every 10 games
+        if (i+1) % 100 == 0: # save every x games
             q_tabel_manager.save_q_table()
     
     print("\nSIMULATION COMPLETE")

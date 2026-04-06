@@ -8,6 +8,7 @@ import traceback
 from stagHare.agents.cabAgentThing import CabAgent
 from stagHare.agents.fetcherBot import FetcherBot
 from stagHare.agents.rl_agent.rl_agent import QLearningAgent
+from stagHare.agents.rl_agent.rl_agent_abstracted import QLearningAbstractedAgent
 from stagHare.environment.state import State
 from stagHare.environment.world import StagHare
 from stagHare.agents.random_agent import Random
@@ -459,11 +460,11 @@ def create_hunters(agent_type, random_agents, forced_random, agent_name="", agen
 
     elif agent_scenario == 7:
         new_name = "R0"
-        new_hunters.append(QLearningAgent(0, new_name, q_table_manager))
+        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager))
         new_name = "R1"
-        new_hunters.append(QLearningAgent(1, new_name, q_table_manager))
+        new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager))
         new_name = "R2"
-        new_hunters.append(QLearningAgent(2, new_name, q_table_manager))
+        new_hunters.append(QLearningAbstractedAgent(2, new_name, q_table_manager))
 
 
     else:

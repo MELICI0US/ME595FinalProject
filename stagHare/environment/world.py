@@ -5,6 +5,7 @@ from stagHare.agents.cabAgentThing import CabAgent
 from stagHare.agents.prey import Prey
 # from stagHare.agents.qalegaatr import QAlegAATr
 from stagHare.agents.rl_agent.rl_agent import QLearningAgent
+from stagHare.agents.rl_agent.rl_agent_abstracted import QLearningAbstractedAgent
 from stagHare.environment.state import State
 import numpy as np
 from typing import List
@@ -207,5 +208,5 @@ class StagHare:
 
     def update_q_table(self, rewards):
         for i, agent in enumerate(self.agents):
-            if isinstance(agent, QLearningAgent):
+            if isinstance(agent, QLearningAbstractedAgent):
                 agent.update_q_table(rewards[i])
