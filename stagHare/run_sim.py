@@ -3,6 +3,7 @@ from tqdm import tqdm
 from offlineSimStuff.runningTools.runnerHelper import create_jhg_sim, create_total_order, create_jhg_engine
 from stagHare.agents.cabAgentThing import CabAgent
 from stagHare.agents.fetcherBot import FetcherBot
+from stagHare.agents.rl_agent.q_table_manager import QTableManager
 from stagHare.environment.world import StagHare
 from stagHare.environment.allocationTranslator import allocation_to_movement, movement_to_allocation
 from stagHare.loggingStuff.stagHareLogger import stagHareLogger
@@ -24,7 +25,7 @@ from stagHare.visualziationTools.gameLogger import GameLogger
 
 from stagHare.runnerHelper import *
 
-def run_game():
+def run_game(q_table_manager):
     height, width = 4, 4 # lets start there, not too big but there.
     forcedRandom = True
     random_agents = True # better for human distribution
@@ -54,7 +55,7 @@ def run_game():
 
         for attempt in range(num_attempts):
             current_game_logger = GameLogger(height, width) # need this per game, not per batch.
-            hunters = create_hunters(agent_type, random_agents, forcedRandom, agent_name=agent_name, agent_scenario=agent_scenario)
+            hunters = create_hunters(agent_type, random_agents, forcedRandom, agent_name=agent_name, agent_scenario=agent_scenario, q_table_manager=q_table_manager)
             current_round_grapher = IndividualRoundGrapher()
             while True:
                 stag_hare = StagHare(height, width, hunters)
@@ -81,10 +82,17 @@ def run_game():
 if __name__ == '__main__':
     print("RUNNING SIMULATION...")
     start_time = time.time()
+    q_tabel_manager = QTableManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_stag_only.txt')
 
-    for i in tqdm(range(100)):
+    for i in tqdm(range(100000)):
         # print("RUNNING GAME ", i)
-        run_game()
+        try:
+            run_game(q_tabel_manager)
+        except Exception as e:
+            print(f"Error in game {i}: {e}")
+
+        if (i+1) % 100 == 0: # save every 10 games
+            q_tabel_manager.save_q_table()
     
     print("\nSIMULATION COMPLETE")
     end_time = time.time()

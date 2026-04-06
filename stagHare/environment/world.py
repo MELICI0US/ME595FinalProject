@@ -208,4 +208,4 @@ class StagHare:
     def update_q_table(self, rewards):
         for i, agent in enumerate(self.agents):
             if isinstance(agent, QLearningAgent):
-                agent.update_q_table(self.state, rewards[i])
+                agent.update_q_table(rewards[i])
