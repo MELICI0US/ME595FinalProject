@@ -26,7 +26,7 @@ from stagHare.visualziationTools.gameLogger import GameLogger
 
 from stagHare.runnerHelper import *
 
-def run_game(q_table_manager):
+def run_game(q_table_manager, agent_scenario=0):
     height, width = 4, 4 # lets start there, not too big but there.
     forcedRandom = True
     random_agents = True # better for human distribution
@@ -47,7 +47,7 @@ def run_game(q_table_manager):
     agent_type = 3 # -1 is ALLEGATR, 0 is a random agent, 1 is the hare greedy agent, 2 is stag greedy agent, 3 is CAB
     # 0 is standard, 1 is nothing, 2 is 2 of whatever bots with a fectcher bot, 3 is a cab with 2 stag and 4 is a cab with 2 hares.
                                                                      # 5 is 2 cabs with 1 stag and 6 is 2 cabs with 1 hare.
-    agent_scenario = 7 # normal whatever I say goes type beat.
+
     scores = []
 
     for agent_name in agent_names:
@@ -84,14 +84,55 @@ def run_game(q_table_manager):
 def create_rl_hunters_from_scenario(agent_scenario=0, q_table_manager=None, epsilon=0.1):
     new_hunters = []
 
-    if agent_scenario == 7:
+    if agent_scenario == 1:
         new_name = "R0"
         new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
+        new_name = "S1"
+        new_hunters.append(StagGreedyAgent(1, new_name))
+        new_name = "S2"
+        new_hunters.append(StagGreedyAgent(2, new_name))
+    elif agent_scenario == 2:
+        new_name = "R0"
+        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
+        new_name = "S1"
+        new_hunters.append(StagGreedyAgent(1, new_name))
+        new_name = "H2"
+        new_hunters.append(HareGreedyAgent(2, new_name))
+    elif agent_scenario == 3:
+        new_name = "R0"
+        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
+        new_name = "H1"
+        new_hunters.append(HareGreedyAgent(1, new_name))
+        new_name = "H2"
+        new_hunters.append(HareGreedyAgent(2, new_name))
+    elif agent_scenario == 4:
+        new_name = "H0"
+        new_hunters.append(HareGreedyAgent(0, new_name))
         new_name = "R1"
         new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
         new_name = "R2"
         new_hunters.append(QLearningAbstractedAgent(2, new_name, q_table_manager, epsilon=epsilon))
-
+    elif agent_scenario == 5:
+        new_name = "S0"
+        new_hunters.append(StagGreedyAgent(0, new_name))
+        new_name = "R1"
+        new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
+        new_name = "R2"
+        new_hunters.append(QLearningAbstractedAgent(2, new_name, q_table_manager, epsilon=epsilon)) 
+    elif agent_scenario == 6:
+        new_name = "R0"
+        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
+        new_name = "C1"
+        new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
+        new_name = "C2"
+        new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
+    elif agent_scenario == 7:
+        new_name = "R0"
+        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
+        new_name = "R1"
+        new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
+        new_name = "C2"
+        new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
     else:
         new_name = "R0"
         new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
@@ -108,6 +149,7 @@ if __name__ == '__main__':
     q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted_stag_only.txt')
 
     cooprtation_scores = []
+    # 0: all RL agents; 1: RL, Stag, Stag; 2: RL, Stag, Hare; 3: RL, Hare, Hare; 4: Hare, RL, RL; 5: Stag, RL, RL; 6: RL, AlegAATr, AlegAATr; 7: RL, RL, AlegAATr
     scenarios = [0]
 
     for scenario in scenarios:

@@ -100,3 +100,6 @@ if __name__ == '__main__':
     end_time = time.time()
     print(f"Total time taken: {end_time - start_time:.2f} seconds")
     print(f"Average cooperation score: {sum(cooprtation_scores)/len(cooprtation_scores):.4f}")
+
+
+    # TODO: Make the agent types different colors
