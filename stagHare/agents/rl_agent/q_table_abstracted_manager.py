@@ -27,7 +27,7 @@ class QTableAbstractedManager():
                     q_value_count = (float(q_value_raw[0]), int(q_value_raw[1]))
 
                     action_raw = action_raw.strip('()').split(', ')
-                    action = bool(action_raw)
+                    action = bool(action_raw == 'True')
 
                     if state not in q_table:
                         q_table[state] = {}
@@ -39,8 +39,6 @@ class QTableAbstractedManager():
         return q_table
         
     def update_q_table(self, reward: float, state_action_history: list):
-        # TODO: add times visited to normalize the q-values
-
         # work backwards so we have the future rewards available
         reverse_history = state_action_history[::-1]
         s_prime, a_prime = None, None

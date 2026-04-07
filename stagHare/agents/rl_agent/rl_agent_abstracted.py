@@ -30,71 +30,63 @@ class QLearningAbstractedAgent(Agent):
                 best_action = max(self.q_table_manager.q_table[state_hash], key=lambda a: self.q_table_manager.q_table[state_hash][a][0]) 
 
                 hunt_hare = best_action
-                action = self.hunt_hare(state) if hunt_hare else self.hunt_stag(state)
+                action = self.hunt_animal(state, HARE_NAME if hunt_hare else STAG_NAME)
+                # print(f"{self.name} is exploiting with action {best_action} at round {round_num}")
 
         # explore with probability epsilon or if no known actions for this state
         if action is None:
-            # hunt_hare = np.random.choice([True, False])
-            hunt_hare = False # force stag to explore it's state
+            hunt_hare = np.random.choice([True, False])
+            # hunt_hare = False # force stag to explore it's state
             if hunt_hare:
-                action = self.hunt_hare(state)
+                action = self.hunt_animal(state, HARE_NAME)
             else:
-                action = self.hunt_stag(state)
+                action = self.hunt_animal(state, STAG_NAME)
+            # print(f"{self.name} is exploring with action {hunt_hare} at round {round_num}")
+
+        # if hunt_hare is True:
+        #     print(f"{self.name} is hunting the hare at round {round_num}")
             
         # store the history for later Q-table updates
         self.state_action_history.append((self.make_state_key(state), hunt_hare))   
  
         return action
     
-    def hunt_hare(self, state) -> bool:
-        self.hare = True
+    def hunt_animal(self, state, animal_name) -> bool:
+        self.hare = (animal_name == HARE_NAME)
 
         agent_positions = state.agent_positions 
+        other_agent_positions = {name: pos for name, pos in agent_positions.items() if name != self.name and name != animal_name}
+
         for name, position in agent_positions.items():
-            if name == HARE_NAME:
-                hare_row, hare_col = position
+            if name == animal_name:   
+                animal_row, animal_col = position
                 break
         
-        # move towards the hare, but stay if we are already adjacent
+        # move towards the animal, but stay if we are already adjacent
         my_row, my_col = state.agent_positions[self.name]
         action = [my_row, my_col] 
 
-        if my_row < hare_row - 1:
-            action[0] += 1
-        elif my_row > hare_row + 1:
-            action[0] -= 1  
-        elif my_col < hare_col - 1:
-            action[1] += 1
-        elif my_col > hare_col + 1:
-            action[1] -= 1
+        positions_adjacent_to_animal = [(animal_row + 1, animal_col), (animal_row - 1, animal_col), (animal_row, animal_col + 1), (animal_row, animal_col - 1)]
+        possible_actions = [(my_row + delta, my_col) for delta in POSSIBLE_DELTA_VALS] + [(my_row, my_col + delta) for delta in POSSIBLE_DELTA_VALS]
 
-        return action
-    
-    def hunt_stag(self, state) -> bool:
-        # TODO: add something that moves around the other players if they ar in the way
-        self.hare = False
+        # filter positions that are occupied by other agents
+        possible_actions = [action for action in possible_actions if action not in other_agent_positions.values()]
+        positions_adjacent_to_animal = [pos for pos in positions_adjacent_to_animal if pos not in other_agent_positions.values()]
 
-        agent_positions = state.agent_positions 
+        if (my_row, my_col) in positions_adjacent_to_animal:
+            return action
+        else:
+            # find action that gets closest to one of the adjacent positions to the animal
+            best_action = None
+            best_distance = float('inf')
+            for action in possible_actions:
+                for adjacent_position in positions_adjacent_to_animal:
+                    distance = abs(action[0] - adjacent_position[0]) + abs(action[1] - adjacent_position[1])
+                    if distance < best_distance:
+                        best_distance = distance
+                        best_action = action
 
-        for name, position in agent_positions.items():
-            if name == STAG_NAME:   
-                stag_row, stag_col = position
-                break
-        
-        # move towards the stag, but stay if we are already adjacent
-        my_row, my_col = state.agent_positions[self.name]
-        action = [my_row, my_col] 
-
-        if my_row < stag_row -1:
-            action[0] += 1
-        elif my_row > stag_row + 1:
-            action[0] -= 1  
-        elif my_col < stag_col -1:
-            action[1] += 1
-        elif my_col > stag_col + 1:
-            action[1] -= 1
-
-        return action
+            return best_action
     
     def make_state_key(self, state: State):
         '''  returns a tuple of (distance_to_stag, distance_to_hare, other_agents_distance_to_stag, other_agents_distance_to_hare) 

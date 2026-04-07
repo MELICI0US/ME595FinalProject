@@ -56,7 +56,7 @@ def run_game(q_table_manager):
 
         for attempt in range(num_attempts):
             current_game_logger = GameLogger(height, width) # need this per game, not per batch.
-            hunters = create_hunters(agent_type, random_agents, forcedRandom, agent_name=agent_name, agent_scenario=agent_scenario, q_table_manager=q_table_manager)
+            hunters = create_hunters(agent_type, random_agents, forcedRandom, agent_name=agent_name, agent_scenario=agent_scenario, q_table_manager=q_table_manager, epsilon=0) # Don't explore when running the example
             current_round_grapher = IndividualRoundGrapher()
             while True:
                 stag_hare = StagHare(height, width, hunters)
@@ -88,16 +88,13 @@ if __name__ == '__main__':
 
     cooprtation_scores = []
 
-    for i in tqdm(range(1000000)):
+    for i in tqdm(range(800)):
         # print("RUNNING GAME ", i)
         try:
             cooprtation_score = run_game(q_tabel_manager)
             cooprtation_scores.append(cooprtation_score)
         except Exception as e:
             print(f"Error in game {i}: {e}")
-
-        if (i+1) % 100 == 0: # save every x games
-            q_tabel_manager.save_q_table()
     
     print("\nSIMULATION COMPLETE")
     end_time = time.time()

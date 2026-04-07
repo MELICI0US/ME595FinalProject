@@ -397,7 +397,7 @@ def create_hunters_scenario(agent_name, agent_scenario):
     # start of the ecab v experts portion.
 
 
-def create_hunters(agent_type, random_agents, forced_random, agent_name="", agent_scenario=0, q_table_manager=None):
+def create_hunters(agent_type, random_agents, forced_random, agent_name="", agent_scenario=0, q_table_manager=None, epsilon=0.1):
 
     new_hunters = []
 
@@ -460,11 +460,11 @@ def create_hunters(agent_type, random_agents, forced_random, agent_name="", agen
 
     elif agent_scenario == 7:
         new_name = "R0"
-        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager))
+        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
         new_name = "R1"
-        new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager))
+        new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
         new_name = "R2"
-        new_hunters.append(QLearningAbstractedAgent(2, new_name, q_table_manager))
+        new_hunters.append(QLearningAbstractedAgent(2, new_name, q_table_manager, epsilon=epsilon))
 
 
     else:
