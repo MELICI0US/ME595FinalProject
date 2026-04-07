@@ -34,7 +34,8 @@ class QLearningAbstractedAgent(Agent):
 
         # explore with probability epsilon or if no known actions for this state
         if action is None:
-            hunt_hare = np.random.choice([True, False])
+            # hunt_hare = np.random.choice([True, False])
+            hunt_hare = False # force stag to explore it's state
             if hunt_hare:
                 action = self.hunt_hare(state)
             else:
@@ -70,13 +71,13 @@ class QLearningAbstractedAgent(Agent):
         return action
     
     def hunt_stag(self, state) -> bool:
+        # TODO: add something that moves around the other players if they ar in the way
         self.hare = False
-
 
         agent_positions = state.agent_positions 
 
         for name, position in agent_positions.items():
-            if name == STAG_NAME:
+            if name == STAG_NAME:   
                 stag_row, stag_col = position
                 break
         
@@ -115,7 +116,13 @@ class QLearningAbstractedAgent(Agent):
         other_agents_distance_to_stag.sort()
         other_agents_distance_to_hare.sort()
 
-        return (distance_to_stag, distance_to_hare, other_agents_distance_to_stag[0], other_agents_distance_to_stag[1], other_agents_distance_to_hare[0], other_agents_distance_to_hare[1])
+        # Make sure the key is int instead of np.int64
+        key = (distance_to_stag, distance_to_hare, other_agents_distance_to_stag[0], other_agents_distance_to_stag[1], other_agents_distance_to_hare[0], other_agents_distance_to_hare[1])
+        int_key = []
+        for item in key:
+            int_key.append(int(item))
+
+        return tuple(int_key)
     
     def distance_to_animal(self, state: State, animal_name:str, agent_name:str) -> int:
         agent_positions = state.agent_positions

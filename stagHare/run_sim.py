@@ -79,16 +79,20 @@ def run_game(q_table_manager):
         cooperation_score, scores_per_player = process_scores(scores)
 
         # curr_logger.add_information_game(agent_scenario, cooperation_score, scores_per_player, agent_name)
+    return cooperation_score
 
 if __name__ == '__main__':
     print("RUNNING SIMULATION...")
     start_time = time.time()
-    q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted.txt')
+    q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted_stag_only.txt')
 
-    for i in tqdm(range(100000)):
+    cooprtation_scores = []
+
+    for i in tqdm(range(1000000)):
         # print("RUNNING GAME ", i)
         try:
-            run_game(q_tabel_manager)
+            cooprtation_score = run_game(q_tabel_manager)
+            cooprtation_scores.append(cooprtation_score)
         except Exception as e:
             print(f"Error in game {i}: {e}")
 
@@ -98,3 +102,4 @@ if __name__ == '__main__':
     print("\nSIMULATION COMPLETE")
     end_time = time.time()
     print(f"Total time taken: {end_time - start_time:.2f} seconds")
+    print(f"Average cooperation score: {sum(cooprtation_scores)/len(cooprtation_scores):.4f}")

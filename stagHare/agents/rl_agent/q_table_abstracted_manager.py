@@ -13,7 +13,7 @@ class QTableAbstractedManager():
         try:
             with open(file_path, 'r') as f:
                 for line in f:
-                    state_raw, action, q_value_raw = line.strip().split(';')
+                    state_raw, action_raw, q_value_raw = line.strip().split(';')
 
                     state_raw = state_raw.strip('()').split(', ')
 
@@ -25,6 +25,9 @@ class QTableAbstractedManager():
 
                     q_value_raw = q_value_raw.strip('()').split(', ')
                     q_value_count = (float(q_value_raw[0]), int(q_value_raw[1]))
+
+                    action_raw = action_raw.strip('()').split(', ')
+                    action = bool(action_raw)
 
                     if state not in q_table:
                         q_table[state] = {}
@@ -42,16 +45,21 @@ class QTableAbstractedManager():
         reverse_history = state_action_history[::-1]
         s_prime, a_prime = None, None
 
+        # print('Number of state-action pairs in history:', len(state_action_history))
+        state_add_count = 0
+        action_add_count = 0
         for state, action in reverse_history:
             # initialize q-table entries if they don't exist
-            state_tuple = tuple(state)
+            state_tuple = state
             
             if state_tuple not in self.q_table:
                 self.q_table[state_tuple] = {}
+                state_add_count += 1
             action_key = action
 
             if action_key not in self.q_table[state_tuple]:
-               self.q_table[state_tuple][action_key] = (0, 0)
+                self.q_table[state_tuple][action_key] = (0, 0)
+                action_add_count += 1
 
             # if this is the end state, update with full reward
             if s_prime is None:
@@ -78,8 +86,10 @@ class QTableAbstractedManager():
                 self.q_table[state_tuple][action_key] = (new_q_value, new_count)
                 s_prime, a_prime = state_tuple, action_key
 
+        # print(f"Added {state_add_count} new states and {action_add_count} new actions to the Q-table.")
+
     def save_q_table(self):
-        # save the q-table to a file for the next iteration
+        # save the q-table to a file for the next iteration        
         with open(self.q_table_file, 'w') as f:
             for state_hash in self.q_table:
                 for action_key in self.q_table[state_hash]:
