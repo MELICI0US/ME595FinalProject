@@ -14,6 +14,7 @@ from stagHare.visualziationTools.batchLogger import BatchLogger
 from stagHare.visualziationTools.inviduvalRoundGrapher import IndividualRoundGrapher
 from stagHare.visualziationTools.gameGrapher import GameGrapher
 from stagHare.visualziationTools.gameLogger import GameLogger
+import matplotlib.pyplot as plt
 
 
 # so what do we actually need to do
@@ -28,7 +29,7 @@ from stagHare.visualziationTools.gameLogger import GameLogger
 
 from stagHare.runnerHelper import *
 
-def run_game(q_table_manager, agent_scenario=0):
+def run_game(q_table_manager, agent_scenario=None):
     height, width = 4, 4 # lets start there, not too big but there.
     forcedRandom = True
     random_agents = True # better for human distribution
@@ -82,85 +83,64 @@ def run_game(q_table_manager, agent_scenario=0):
         # curr_logger.add_information_game(agent_scenario, cooperation_score, scores_per_player, agent_name)
     return cooperation_score, scores_per_player, rewards
 
-def create_rl_hunters_from_scenario(agent_scenario=0, q_table_manager=None, epsilon=0.1):
+def create_rl_hunters_from_scenario(agent_scenario=None, q_table_manager=None, epsilon=0.1):
     new_hunters = []
 
-    if agent_scenario == 1:
-        new_name = "R0"
-        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R1"
-        new_hunters.append(StagGreedyAgent(1, new_name))
-        new_name = "R2"
-        new_hunters.append(StagGreedyAgent(2, new_name))
-    elif agent_scenario == 2:
-        new_name = "R0"
-        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R1"
-        new_hunters.append(StagGreedyAgent(1, new_name))
-        new_name = "R2"
-        new_hunters.append(HareGreedyAgent(2, new_name))
-    elif agent_scenario == 3:
-        new_name = "R0"
-        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R1"
-        new_hunters.append(HareGreedyAgent(1, new_name))
-        new_name = "R2"
-        new_hunters.append(HareGreedyAgent(2, new_name))
-    elif agent_scenario == 4:
-        new_name = "R0"
-        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R1"
-        new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R2"
-        new_hunters.append(HareGreedyAgent(2, new_name))
-    elif agent_scenario == 5:
-        new_name = "R0"
-        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon)) 
-        new_name = "R1"
-        new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R2"
-        new_hunters.append(StagGreedyAgent(2, new_name))
-    elif agent_scenario == 6:
-        new_name = "R0"
-        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R1"
-        new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
-        new_name = "R2"
-        new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
-    elif agent_scenario == 7:
-        new_name = "R0"
-        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R1"
-        new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R2"
-        new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
-    else:
-        new_name = "R0"
-        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R1"
-        new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "R2"
-        new_hunters.append(QLearningAbstractedAgent(2, new_name, q_table_manager, epsilon=epsilon))
+    for i in range(3):
+        new_name = "R"+str(i)
+        if agent_scenario is None:
+            new_hunters.append(QLearningAbstractedAgent(i, new_name, q_table_manager, epsilon=epsilon))
+        elif "RL" in agent_scenario[i]:
+            new_hunters.append(QLearningAbstractedAgent(i, new_name, q_table_manager, epsilon=epsilon))
+        elif "Stag" in agent_scenario[i]:
+            new_hunters.append(StagGreedyAgent(i, new_name))
+        elif "Hare" in agent_scenario[i]:
+            new_hunters.append(HareGreedyAgent(i, new_name))
+        elif "AlegAATr" in agent_scenario[i]:
+            new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
 
     return new_hunters
 
 if __name__ == '__main__':
     print("RUNNING SIMULATION...")
     start_time = time.time()
-    q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted_stag_only.txt')
+    # q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted_stag_only.txt')
+    q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted.txt')
 
     # 0: all RL agents; 1: RL, Stag, Stag; 2: RL, Stag, Hare; 3: RL, Hare, Hare; 4: Hare, RL, RL; 5: Stag, RL, RL; 6: RL, AlegAATr, AlegAATr; 7: RL, RL, AlegAATr
-    scenarios = [ "All RL Agents",  "One RL Agent with 2 Stag Greedy Agents",  "One RL Agent with 1 Stag Greedy Agent and 1 Hare Greedy Agent", "One RL Agent with 2 Hare Greedy Agents", "Two RL Agent with 1 Hare Greedy Agents", "Two RL Agent with 1 Stag Greedy Agents", "One RL Agent with 2 AlegAATr Agents", "Two RL Agents with 1 AlegAATr Agent"]
+    # scenarios = [ "All RL Agents",  "One RL Agent with 2 Stag Greedy Agents",  "One RL Agent with 1 Stag Greedy Agent and 1 Hare Greedy Agent", "One RL Agent with 2 Hare Greedy Agents", "Two RL Agent with 1 Hare Greedy Agents", "Two RL Agent with 1 Stag Greedy Agents", "One RL Agent with 2 AlegAATr Agents", "Two RL Agents with 1 AlegAATr Agent", "One Stag Greedy Agent with 1 Hare Greedy Agent and 1 AlegAATr Agent", "One Stag Greedy Agent with 2 AlegAATr Agents", "One Hare Greedy Agent with 2 AlegAATr Agents", "One Stag Greedy Agent with 2 Hare Greedy Agents"]
+    # agent_names_for_scenarios = [("RL 1", "RL 2", "RL 3"), ("RL", "Stag 1", "Stag 2"), ("RL", "Stag", "Hare"), ("RL", "Hare 1", "Hare 2"), ("RL 1", "RL 2", "Hare"), ("RL 1", "RL 2", "Stag"), ("RL", "AlegAATr 1", "AlegAATr 2"), ("RL 1", "RL 2", "AlegAATr"), ("Stag", "Hare", "AlegAATr"), ("Stag", "AlegAATr 1", "AlegAATr 2"), ("Hare", "AlegAATr 1", "AlegAATr 2")]
+
+    agents = ["RL", "Stag Greedy", "Hare Greedy", "AlegAATr"]
+    scenarios = []
+    agent_names_for_scenarios = []
+
+    # for each combination of agents, create a scenario name and add it to the scenarios list.
+    for i in range(len(agents)):
+        for j in range(i, len(agents)):
+            for k in range(j, len(agents)):
+                scenario_name = f"{agents[i]}, {agents[j]}, {agents[k]}"
+                scenarios.append(scenario_name)
+                agent_names_for_scenarios.append((agents[i] + " 1", agents[j] + " 2", agents[k] + " 3"))  
+
+    for i in range(len(scenarios)):
+        print(f"Scenario {i}: {scenarios[i]}")  
+
+    rl_agent_rewards = []
+    stag_agent_rewards = []
+    hare_agent_rewards = []
+    alegaatr_agent_rewards = []
 
     for scenario, scenario_title in enumerate(scenarios):
+        print(f"\nRunning scenario {scenario}: {scenario_title}...")
+
         cooporation = []
         scores = []
         rewards_list = []
         
         for i in tqdm(range(100)):
-            # print("RUNNING GAME ", i)
             try:
-                cooporation_score, scores_per_player, rewards = run_game(q_tabel_manager, agent_scenario = scenario)
+                cooporation_score, scores_per_player, rewards = run_game(q_tabel_manager, agent_scenario = agent_names_for_scenarios[scenario])
                 cooporation.append(cooporation_score)
                 scores.append(tuple(scores_per_player))
                 rewards_list.append(rewards)
@@ -172,21 +152,6 @@ if __name__ == '__main__':
         player_1_rewards = [reward[2] for reward in rewards_list]
         player_2_rewards = [reward[3] for reward in rewards_list]
         player_3_rewards = [reward[4] for reward in rewards_list]
-        
-        # # [none, hare, stag]
-        # player_1_scores = [0, 0, 0]
-        # player_2_scores = [0, 0, 0]
-        # player_3_scores = [0, 0, 0]
-
-        # for score in scores:
-        #     player_1_scores = np.array(player_1_scores) + np.array(score[0])
-        #     player_2_scores = np.array(player_2_scores) + np.array(score[1])
-        #     player_3_scores = np.array(player_3_scores) + np.array(score[2])
-        
-        # print(f"Total scores for scenario {scenario_title}:")
-        # print(f"Player 1: None: {player_1_scores[0]}, Hare  {player_1_scores[1]}, Stag {player_1_scores[2]}")
-        # print(f"Player 2: None: {player_2_scores[0]}, Hare  {player_2_scores[1]}, Stag {player_2_scores[2]}")
-        # print(f"Player 3: None: {player_3_scores[0]}, Hare  {player_3_scores[1]}, Stag {player_3_scores[2]}")
 
         print(f"Average rewards for scenario {scenario_title}:")
         print(f"Player 1: {np.mean(player_1_rewards):.4f}")
@@ -194,6 +159,35 @@ if __name__ == '__main__':
         print(f"Player 3: {np.mean(player_3_rewards):.4f}")
 
         print(f"Average cooperation score for scenario {scenario}: {sum(cooporation)/len(cooporation):.4f}")
+
+        for i, player_name in enumerate(agent_names_for_scenarios[scenario]):
+            if "RL" in player_name:
+                rl_agent_rewards.append(np.mean([reward[i+2] for reward in rewards_list]))
+            elif "Stag" in player_name:
+                stag_agent_rewards.append(np.mean([reward[i+2] for reward in rewards_list]))
+            elif "Hare" in player_name:
+                hare_agent_rewards.append(np.mean([reward[i+2] for reward in rewards_list]))
+            elif "AlegAATr" in player_name:
+                alegaatr_agent_rewards.append(np.mean([reward[i+2] for reward in rewards_list]))
+           
+        if scenario == 0 or scenario == 4 or scenario == 2 or scenario == 9: # only plot some of the scenarios
+            # plot the scores for each player as a bar graph
+            plt.figure(figsize=(10, 6))
+            plt.bar(agent_names_for_scenarios[scenario], [np.mean(player_1_rewards), np.mean(player_2_rewards), np.mean(player_3_rewards)])
+            plt.title(f"Average Rewards for Each Player in Scenario: {scenario_title}")
+            plt.xlabel("Players")
+            plt.ylabel("Average Rewards")
+            plt.ylim(0, max(np.mean(player_1_rewards), np.mean(player_2_rewards), np.mean(player_3_rewards)) + 1)
+            plt.show()
+
+    # plot the average rewards for each type of agent across all scenarios
+    plt.figure(figsize=(10, 6))
+    plt.bar(["RL Agent", "Stag Greedy Agent", "Hare Greedy Agent", "AlegAATr Agent"], [np.mean(rl_agent_rewards), np.mean(stag_agent_rewards), np.mean(hare_agent_rewards), np.mean(alegaatr_agent_rewards)])
+    plt.title("Average Rewards for Each Type of Agent Across All Scenarios")
+    plt.xlabel("Agent Types")
+    plt.ylabel("Average Rewards")
+    plt.ylim(0, max(np.mean(rl_agent_rewards), np.mean(stag_agent_rewards), np.mean(hare_agent_rewards), np.mean(alegaatr_agent_rewards)) + 1)
+    plt.show()
     
     print("\nSIMULATION COMPLETE")
     end_time = time.time()

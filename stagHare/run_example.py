@@ -84,7 +84,7 @@ def run_game(q_table_manager):
 if __name__ == '__main__':
     print("RUNNING SIMULATION...")
     start_time = time.time()
-    q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted_stag_only.txt')
+    q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted.txt')
 
     cooprtation_scores = []
 

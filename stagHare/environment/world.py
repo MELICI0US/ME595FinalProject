@@ -49,7 +49,7 @@ class StagHare:
 
     def transition(self) -> List[float]:
         # we need to split this into an init and 2 stages
-        if isinstance(self.agents[4], AlegAATr): # or isinstance(self.agents[4], QAlegAATr):
+        if isinstance(self.agents[4], AlegAATr) or isinstance(self.agents[3], AlegAATr): # or isinstance(self.agents[4], QAlegAATr):
             rewards = self.transition_ethan()
         else:
             rewards = self.transition_sean()
