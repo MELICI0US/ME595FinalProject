@@ -67,7 +67,7 @@ def run_game(q_table_manager):
             stag_hare.state.hunting_hare_map = {"R"+str(i) : 2 for i in range(3)} # value that it can never be, sort of a NAN. 
 
             # just run the fetcher.
-            new_score, intents = run_trial_graphing(stag_hare, current_round_grapher, current_game_logger, graph=False)
+            new_score, intents, rewards = run_trial_graphing(stag_hare, current_round_grapher, current_game_logger, graph=True)
             scores.append(new_score)
             current_batch_logger.add_game(stag_hare)
 
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     cooprtation_scores = []
 
-    for i in tqdm(range(800)):
+    for i in tqdm(range(5)):
         # print("RUNNING GAME ", i)
         try:
             cooprtation_score = run_game(q_tabel_manager)
@@ -100,6 +100,3 @@ if __name__ == '__main__':
     end_time = time.time()
     print(f"Total time taken: {end_time - start_time:.2f} seconds")
     print(f"Average cooperation score: {sum(cooprtation_scores)/len(cooprtation_scores):.4f}")
-
-
-    # TODO: Make the agent types different colors

@@ -67,7 +67,7 @@ def run_game(q_table_manager):
             stag_hare.state.hunting_hare_map = {"R"+str(i) : 2 for i in range(3)} # value that it can never be, sort of a NAN. 
 
             # just run the fetcher.
-            new_score, intents = run_trial_graphing(stag_hare, current_round_grapher, current_game_logger, graph=False)
+            new_score, intents, rewards = run_trial_graphing(stag_hare, current_round_grapher, current_game_logger, graph=False)
             scores.append(new_score)
             current_batch_logger.add_game(stag_hare)
 
@@ -84,11 +84,12 @@ def run_game(q_table_manager):
 if __name__ == '__main__':
     print("RUNNING SIMULATION...")
     start_time = time.time()
-    q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted_stag_only.txt')
+    # q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted_stag_only.txt')
+    q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted.txt')
 
     cooprtation_scores = []
 
-    for i in tqdm(range(100000)):
+    for i in tqdm(range(1000000)):
         # print("RUNNING GAME ", i)
         try:
             cooprtation_score = run_game(q_tabel_manager)

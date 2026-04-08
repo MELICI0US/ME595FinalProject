@@ -3,8 +3,10 @@ from tqdm import tqdm
 from offlineSimStuff.runningTools.runnerHelper import create_jhg_sim, create_total_order, create_jhg_engine
 from stagHare.agents.cabAgentThing import CabAgent
 from stagHare.agents.fetcherBot import FetcherBot
+from stagHare.agents.rl_agent.hare_greedy import HareGreedyAgent
 from stagHare.agents.rl_agent.q_table_abstracted_manager import QTableAbstractedManager
 from stagHare.agents.rl_agent.q_table_manager import QTableManager
+from stagHare.agents.rl_agent.stag_greedy import StagGreedyAgent
 from stagHare.environment.world import StagHare
 from stagHare.environment.allocationTranslator import allocation_to_movement, movement_to_allocation
 from stagHare.loggingStuff.stagHareLogger import stagHareLogger
@@ -56,7 +58,7 @@ def run_game(q_table_manager, agent_scenario=0):
 
         for attempt in range(num_attempts):
             current_game_logger = GameLogger(height, width) # need this per game, not per batch.
-            hunters = create_rl_hunters_from_scenario(agent_name=agent_name, agent_scenario=agent_scenario, q_table_manager=q_table_manager, epsilon=0) # Don't explore when running the eval
+            hunters = create_rl_hunters_from_scenario(agent_scenario=agent_scenario, q_table_manager=q_table_manager, epsilon=0) # Don't explore when running the eval
             current_round_grapher = IndividualRoundGrapher()
             while True:
                 stag_hare = StagHare(height, width, hunters)
@@ -67,7 +69,7 @@ def run_game(q_table_manager, agent_scenario=0):
             stag_hare.state.hunting_hare_map = {"R"+str(i) : 2 for i in range(3)} # value that it can never be, sort of a NAN. 
 
             # just run the fetcher.
-            new_score, intents = run_trial_graphing(stag_hare, current_round_grapher, current_game_logger, graph=False)
+            new_score, intents, rewards = run_trial_graphing(stag_hare, current_round_grapher, current_game_logger, graph=False)
             scores.append(new_score)
             current_batch_logger.add_game(stag_hare)
 
@@ -75,11 +77,10 @@ def run_game(q_table_manager, agent_scenario=0):
 
             # game_grapher.playback_game(current_game_logger)
             # game_grapher.create_game_graph(current_game_logger)
-
         cooperation_score, scores_per_player = process_scores(scores)
 
         # curr_logger.add_information_game(agent_scenario, cooperation_score, scores_per_player, agent_name)
-    return cooperation_score
+    return cooperation_score, scores_per_player, rewards
 
 def create_rl_hunters_from_scenario(agent_scenario=0, q_table_manager=None, epsilon=0.1):
     new_hunters = []
@@ -87,51 +88,51 @@ def create_rl_hunters_from_scenario(agent_scenario=0, q_table_manager=None, epsi
     if agent_scenario == 1:
         new_name = "R0"
         new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "S1"
+        new_name = "R1"
         new_hunters.append(StagGreedyAgent(1, new_name))
-        new_name = "S2"
+        new_name = "R2"
         new_hunters.append(StagGreedyAgent(2, new_name))
     elif agent_scenario == 2:
         new_name = "R0"
         new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "S1"
+        new_name = "R1"
         new_hunters.append(StagGreedyAgent(1, new_name))
-        new_name = "H2"
+        new_name = "R2"
         new_hunters.append(HareGreedyAgent(2, new_name))
     elif agent_scenario == 3:
         new_name = "R0"
         new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "H1"
+        new_name = "R1"
         new_hunters.append(HareGreedyAgent(1, new_name))
-        new_name = "H2"
+        new_name = "R2"
         new_hunters.append(HareGreedyAgent(2, new_name))
     elif agent_scenario == 4:
-        new_name = "H0"
-        new_hunters.append(HareGreedyAgent(0, new_name))
+        new_name = "R0"
+        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
         new_name = "R1"
         new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
         new_name = "R2"
-        new_hunters.append(QLearningAbstractedAgent(2, new_name, q_table_manager, epsilon=epsilon))
+        new_hunters.append(HareGreedyAgent(2, new_name))
     elif agent_scenario == 5:
-        new_name = "S0"
-        new_hunters.append(StagGreedyAgent(0, new_name))
+        new_name = "R0"
+        new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon)) 
         new_name = "R1"
         new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
         new_name = "R2"
-        new_hunters.append(QLearningAbstractedAgent(2, new_name, q_table_manager, epsilon=epsilon)) 
+        new_hunters.append(StagGreedyAgent(2, new_name))
     elif agent_scenario == 6:
         new_name = "R0"
         new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "C1"
+        new_name = "R1"
         new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
-        new_name = "C2"
+        new_name = "R2"
         new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
     elif agent_scenario == 7:
         new_name = "R0"
         new_hunters.append(QLearningAbstractedAgent(0, new_name, q_table_manager, epsilon=epsilon))
         new_name = "R1"
         new_hunters.append(QLearningAbstractedAgent(1, new_name, q_table_manager, epsilon=epsilon))
-        new_name = "C2"
+        new_name = "R2"
         new_hunters.append(AlegAATr(name=new_name, lmbda=0.0, ml_model_type='knn', enhanced=True))
     else:
         new_name = "R0"
@@ -148,19 +149,51 @@ if __name__ == '__main__':
     start_time = time.time()
     q_tabel_manager = QTableAbstractedManager(q_table_file='stagHare/agents/rl_agent/q_table_4x4_abstracted_stag_only.txt')
 
-    cooprtation_scores = []
     # 0: all RL agents; 1: RL, Stag, Stag; 2: RL, Stag, Hare; 3: RL, Hare, Hare; 4: Hare, RL, RL; 5: Stag, RL, RL; 6: RL, AlegAATr, AlegAATr; 7: RL, RL, AlegAATr
-    scenarios = [0]
+    scenarios = [ "All RL Agents",  "One RL Agent with 2 Stag Greedy Agents",  "One RL Agent with 1 Stag Greedy Agent and 1 Hare Greedy Agent", "One RL Agent with 2 Hare Greedy Agents", "Two RL Agent with 1 Hare Greedy Agents", "Two RL Agent with 1 Stag Greedy Agents", "One RL Agent with 2 AlegAATr Agents", "Two RL Agents with 1 AlegAATr Agent"]
 
-    for scenario in scenarios:
-        for i in tqdm(range(800)):
+    for scenario, scenario_title in enumerate(scenarios):
+        cooporation = []
+        scores = []
+        rewards_list = []
+        
+        for i in tqdm(range(100)):
             # print("RUNNING GAME ", i)
             try:
-                cooprtation_score = run_game(q_tabel_manager, scenario = scenario)
-                cooprtation_scores.append(cooprtation_score)
+                cooporation_score, scores_per_player, rewards = run_game(q_tabel_manager, agent_scenario = scenario)
+                cooporation.append(cooporation_score)
+                scores.append(tuple(scores_per_player))
+                rewards_list.append(rewards)
+                
             except Exception as e:
                 print(f"Error in game {i}: {e}")
-        print(f"Average cooperation score for scenario {scenario}: {sum(cooprtation_scores)/len(cooprtation_scores):.4f}")
+
+        # print(f"rewards from the last game of scenario {scenario_title}: {rewards}")
+        player_1_rewards = [reward[2] for reward in rewards_list]
+        player_2_rewards = [reward[3] for reward in rewards_list]
+        player_3_rewards = [reward[4] for reward in rewards_list]
+        
+        # # [none, hare, stag]
+        # player_1_scores = [0, 0, 0]
+        # player_2_scores = [0, 0, 0]
+        # player_3_scores = [0, 0, 0]
+
+        # for score in scores:
+        #     player_1_scores = np.array(player_1_scores) + np.array(score[0])
+        #     player_2_scores = np.array(player_2_scores) + np.array(score[1])
+        #     player_3_scores = np.array(player_3_scores) + np.array(score[2])
+        
+        # print(f"Total scores for scenario {scenario_title}:")
+        # print(f"Player 1: None: {player_1_scores[0]}, Hare  {player_1_scores[1]}, Stag {player_1_scores[2]}")
+        # print(f"Player 2: None: {player_2_scores[0]}, Hare  {player_2_scores[1]}, Stag {player_2_scores[2]}")
+        # print(f"Player 3: None: {player_3_scores[0]}, Hare  {player_3_scores[1]}, Stag {player_3_scores[2]}")
+
+        print(f"Average rewards for scenario {scenario_title}:")
+        print(f"Player 1: {np.mean(player_1_rewards):.4f}")
+        print(f"Player 2: {np.mean(player_2_rewards):.4f}")
+        print(f"Player 3: {np.mean(player_3_rewards):.4f}")
+
+        print(f"Average cooperation score for scenario {scenario}: {sum(cooporation)/len(cooporation):.4f}")
     
     print("\nSIMULATION COMPLETE")
     end_time = time.time()

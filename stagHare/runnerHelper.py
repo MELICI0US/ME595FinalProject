@@ -47,7 +47,7 @@ def run_trial_graphing(stag_hare, current_round_grapher, current_game_logger, gr
             if graph: 
                 current_round_grapher.create_round_graph(stag_hare, fig=fig, ax=ax, animate=False)
             # passes by value. thanks python.
-            return create_new_score(stag_hare), intents
+            return create_new_score(stag_hare), intents, rewards
 
 def run_trial_sim_no_graphing(stag_hare):
     intents = [] # THIs is not elegant, but it does work.

@@ -53,7 +53,9 @@ class IndividualRoundGrapher():
         if animate:
             plt.pause(0.5)
         else:
+            plt.pause(0.5)
             plt.show()
+            
 
 
     def create_round_from_matrix(self, image, round_num, last_round=False):
